@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Truck, UtensilsCrossed, CheckCircle } from "lucide-react";
+import { ArrowLeft, Truck, UtensilsCrossed, CheckCircle, MessageCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 type OrderType = "delivery" | "dine_in";
+
+// Configure your WhatsApp number here (include country code without + sign)
+const WHATSAPP_NUMBER = "919999999999"; // Replace with actual restaurant number
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
@@ -36,11 +39,63 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const generateWhatsAppMessage = () => {
+    const itemsList = items
+      .map((item) => `${item.quantity}x ${item.name} - ₹${item.price * item.quantity}`)
+      .join("\n");
+
+    const orderDetails = `
+🍕 *NEW ORDER*
+━━━━━━━━━━━━━━━
+
+*Order Type:* ${orderType === "delivery" ? "🚚 Delivery" : "🍽️ Dine-In"}
+
+*Customer Details:*
+• Name: ${formData.name}
+• Phone: ${formData.phone}
+${formData.email ? `• Email: ${formData.email}` : ""}
+${orderType === "delivery" ? `• Address: ${formData.address}` : `• Table No: ${formData.tableNumber}`}
+
+*Order Items:*
+${itemsList}
+
+━━━━━━━━━━━━━━━
+*Total: ₹${totalPrice}*
+━━━━━━━━━━━━━━━
+
+${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInstructions}` : ""}
+    `.trim();
+
+    return orderDetails;
+  };
+
+  const openWhatsApp = () => {
+    const message = encodeURIComponent(generateWhatsAppMessage());
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (items.length === 0) {
       toast({ title: "Cart is empty", variant: "destructive" });
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.name.trim() || !formData.phone.trim()) {
+      toast({ title: "Please fill in required fields", variant: "destructive" });
+      return;
+    }
+
+    if (orderType === "delivery" && !formData.address.trim()) {
+      toast({ title: "Please enter delivery address", variant: "destructive" });
+      return;
+    }
+
+    if (orderType === "dine_in" && !formData.tableNumber.trim()) {
+      toast({ title: "Please enter table number", variant: "destructive" });
       return;
     }
 
@@ -52,12 +107,12 @@ const Checkout = () => {
         .from("orders")
         .insert({
           order_type: orderType,
-          customer_name: formData.name,
-          phone: formData.phone,
-          email: formData.email || null,
-          address: orderType === "delivery" ? formData.address : null,
+          customer_name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim() || null,
+          address: orderType === "delivery" ? formData.address.trim() : null,
           table_number: orderType === "dine_in" ? parseInt(formData.tableNumber) : null,
-          special_instructions: formData.specialInstructions || null,
+          special_instructions: formData.specialInstructions.trim() || null,
           total: totalPrice,
           status: "pending",
         })
@@ -81,24 +136,8 @@ const Checkout = () => {
 
       if (itemsError) throw itemsError;
 
-      // Submit to Formspree for email notification
-      const formspreeData = {
-        order_type: orderType,
-        customer_name: formData.name,
-        phone: formData.phone,
-        email: formData.email || "Not provided",
-        address: orderType === "delivery" ? formData.address : "N/A",
-        table_number: orderType === "dine_in" ? formData.tableNumber : "N/A",
-        special_instructions: formData.specialInstructions || "None",
-        total: `₹${totalPrice}`,
-        items: items.map(item => `${item.quantity}x ${item.name} - ₹${item.price * item.quantity}`).join("\n"),
-      };
-
-      await fetch("https://formspree.io/f/myzwaopp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formspreeData),
-      });
+      // Open WhatsApp with order details
+      openWhatsApp();
 
       setOrderSuccess(true);
       clearCart();
@@ -130,6 +169,9 @@ const Checkout = () => {
             {orderType === "delivery"
               ? "Your order is being prepared and will be delivered soon."
               : `Your order is being prepared and will be served at Table ${formData.tableNumber}.`}
+          </p>
+          <p className="text-sm text-muted-foreground mb-6">
+            A WhatsApp message has been opened with your order details. Please send it to confirm your order with the restaurant.
           </p>
           <div className="space-y-3">
             <Button variant="hero" className="w-full" onClick={() => navigate("/")}>
@@ -234,6 +276,14 @@ const Checkout = () => {
           </div>
         </div>
 
+        {/* WhatsApp Notice */}
+        <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6 flex items-center gap-3">
+          <MessageCircle className="w-6 h-6 text-primary flex-shrink-0" />
+          <p className="text-sm text-foreground">
+            Your order will be sent via WhatsApp for quick confirmation.
+          </p>
+        </div>
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="bg-card rounded-xl p-6 shadow-soft space-y-4">
@@ -251,6 +301,7 @@ const Checkout = () => {
                   onChange={handleInputChange}
                   placeholder="Your name"
                   required
+                  maxLength={100}
                 />
               </div>
               <div className="space-y-2">
@@ -263,6 +314,7 @@ const Checkout = () => {
                   onChange={handleInputChange}
                   placeholder="Your phone number"
                   required
+                  maxLength={15}
                 />
               </div>
             </div>
@@ -276,6 +328,7 @@ const Checkout = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="your@email.com"
+                maxLength={255}
               />
             </div>
 
@@ -290,6 +343,7 @@ const Checkout = () => {
                   placeholder="Enter your full delivery address"
                   required
                   rows={3}
+                  maxLength={500}
                 />
               </div>
             ) : (
@@ -317,6 +371,7 @@ const Checkout = () => {
                 onChange={handleInputChange}
                 placeholder="Any special requests or dietary requirements"
                 rows={2}
+                maxLength={500}
               />
             </div>
           </div>
@@ -328,7 +383,8 @@ const Checkout = () => {
             className="w-full"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Placing Order..." : `Place Order • ₹${totalPrice}`}
+            <MessageCircle className="w-5 h-5 mr-2" />
+            {isSubmitting ? "Processing..." : `Order via WhatsApp • ₹${totalPrice}`}
           </Button>
         </form>
       </main>
