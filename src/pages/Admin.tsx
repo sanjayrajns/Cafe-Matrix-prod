@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AdminReservations from "@/components/admin/AdminReservations";
 import AdminOrders from "@/components/admin/AdminOrders";
+import AdminMenuItems from "@/components/admin/AdminMenuItems";
 
 const Admin = () => {
   const { toast } = useToast();
