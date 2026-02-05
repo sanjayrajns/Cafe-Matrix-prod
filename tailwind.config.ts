@@ -23,7 +23,7 @@ export default {
   				'sans-serif'
   			],
   			sans: [
-  				'Work Sans',
+  				'Montserrat',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',
@@ -36,7 +36,7 @@ export default {
   				'sans-serif'
   			],
   			serif: [
-  				'Lora',
+  				'Cormorant Garamond',
   				'ui-serif',
   				'Georgia',
   				'Cambria',
@@ -45,7 +45,7 @@ export default {
   				'serif'
   			],
   			mono: [
-  				'Inconsolata',
+  				'IBM Plex Mono',
   				'ui-monospace',
   				'SFMono-Regular',
   				'Menlo',
@@ -181,7 +181,7 @@ export default {
   					transform: 'translateX(0)'
   				}
   			},
-  			'float': {
+  			float: {
   				'0%, 100%': {
   					transform: 'translateY(0)'
   				},
@@ -189,7 +189,7 @@ export default {
   					transform: 'translateY(-10px)'
   				}
   			},
-  			'marquee': {
+  			marquee: {
   				'0%': {
   					transform: 'translateX(0%)'
   				},
@@ -207,8 +207,8 @@ export default {
   			'scale-in': 'scale-in 0.5s ease-out forwards',
   			'slide-in-right': 'slide-in-right 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
   			'slide-in-left': 'slide-in-left 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-  			'float': 'float 3s ease-in-out infinite',
-  			'marquee': 'marquee 25s linear infinite'
+  			float: 'float 3s ease-in-out infinite',
+  			marquee: 'marquee 25s linear infinite'
   		},
   		boxShadow: {
   			'2xs': 'var(--shadow-2xs)',
