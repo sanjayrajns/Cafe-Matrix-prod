@@ -277,8 +277,8 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
         </div>
 
         {/* WhatsApp Notice */}
-        <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-6 flex items-center gap-3">
-          <MessageCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+        <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6 flex items-center gap-3">
+          <MessageCircle className="w-6 h-6 text-primary flex-shrink-0" />
           <p className="text-sm text-foreground">
             Your order will be sent via WhatsApp for quick confirmation.
           </p>
