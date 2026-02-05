@@ -66,7 +66,6 @@ const Order = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent" />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="text-4xl mb-2">{category.icon}</div>
                       <p className="font-medium text-foreground text-sm">{category.label}</p>
                     </div>
                   </div>

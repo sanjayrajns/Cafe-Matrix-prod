@@ -107,11 +107,8 @@ const Menu = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
-                <span className="text-6xl">
-                  {categories.find((c) => c.id === activeCategory)?.icon}
-                </span>
-                <h3 className="font-display text-3xl text-white mt-2">
-                  {categories.find((c) => c.id === activeCategory)?.label.split(" ").slice(1).join(" ")}
+                <h3 className="font-display text-3xl text-white">
+                  {categories.find((c) => c.id === activeCategory)?.label}
                 </h3>
               </div>
             </div>

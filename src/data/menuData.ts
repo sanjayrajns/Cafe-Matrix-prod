@@ -14,11 +14,11 @@ import frappeImg from "@/assets/menu/frappe-featured.jpg";
 import pastriesImg from "@/assets/menu/pastries-featured.jpg";
 
 export const categories = [
-  { id: "pizza", label: "🍕 Pizza", icon: "🍕" },
-  { id: "burgers", label: "🍔 Burgers", icon: "🍔" },
-  { id: "desserts", label: "🍰 Desserts", icon: "🍰" },
-  { id: "mojitos", label: "🍹 Mojitos", icon: "🍹" },
-  { id: "milkshakes", label: "🥤 Shakes", icon: "🥤" },
+  { id: "pizza", label: "Pizza" },
+  { id: "burgers", label: "Burgers" },
+  { id: "desserts", label: "Desserts" },
+  { id: "mojitos", label: "Mojitos" },
+  { id: "milkshakes", label: "Shakes" },
 ];
 
 export const menuItems: Record<string, { name: string; price: number; featured?: boolean }[]> = {

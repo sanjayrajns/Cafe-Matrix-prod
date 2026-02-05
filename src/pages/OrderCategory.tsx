@@ -75,7 +75,6 @@ const OrderCategory = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
           <div className="absolute bottom-4 left-4">
-            <div className="text-4xl mb-2">{currentCategory.icon}</div>
             <h2 className="font-display text-3xl text-foreground">
               {currentCategory.label}
             </h2>
