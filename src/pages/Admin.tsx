@@ -181,19 +181,8 @@ const Admin = () => {
           </TabsContent>
 
           {/* Menu Tab */}
-          <TabsContent value="menu" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-2xl text-foreground">Menu Management</h2>
-            </div>
-            <div className="bg-card rounded-xl p-8 text-center">
-              <UtensilsCrossed className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">
-                Menu items are currently managed in code. Database-driven menu management coming soon!
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Contact support to update menu items.
-              </p>
-            </div>
+          <TabsContent value="menu">
+            <AdminMenuItems />
           </TabsContent>
 
           {/* Settings Tab */}

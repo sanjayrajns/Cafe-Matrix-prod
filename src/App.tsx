@@ -7,6 +7,7 @@ import { CartProvider } from "./contexts/CartContext";
 import Index from "./pages/Index";
 import Reservations from "./pages/Reservations";
 import Order from "./pages/Order";
+import OrderCategory from "./pages/OrderCategory";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Admin from "./pages/Admin";
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/reservations" element={<Reservations />} />
             <Route path="/order" element={<Order />} />
+            <Route path="/order/:categoryId" element={<OrderCategory />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/admin" element={<Admin />} />
