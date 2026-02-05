@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Truck, UtensilsCrossed, Check, X, Clock, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Truck, UtensilsCrossed, Check, X, Clock, Trash2, MapPin, ChefHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,7 +34,7 @@ interface Order {
 const AdminOrders = () => {
   const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
+  
 
   const fetchOrders = async () => {
     const { data, error } = await supabase
@@ -92,15 +92,6 @@ const AdminOrders = () => {
     fetchOrders();
   };
 
-  const toggleExpand = (id: string) => {
-    const newExpanded = new Set(expandedOrders);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedOrders(newExpanded);
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -121,8 +112,6 @@ const AdminOrders = () => {
   const dineInOrders = orders.filter((o) => o.order_type === "dine_in");
 
   const renderOrderCard = (order: Order) => {
-    const isExpanded = expandedOrders.has(order.id);
-    
     return (
       <motion.div
         key={order.id}
@@ -154,8 +143,8 @@ const AdminOrders = () => {
                 {order.email && ` • ${order.email}`}
               </div>
               {order.order_type === "delivery" && order.address && (
-                <p className="text-sm text-muted-foreground">
-                  📍 {order.address}
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> {order.address}
                 </p>
               )}
             </div>
@@ -178,7 +167,7 @@ const AdminOrders = () => {
                   className="text-accent"
                   onClick={() => updateOrderStatus(order.id, "preparing")}
                 >
-                  🍳
+                  <ChefHat className="w-4 h-4" />
                 </Button>
               )}
               {order.status === "preparing" && (
@@ -188,7 +177,7 @@ const AdminOrders = () => {
                   className="text-primary"
                   onClick={() => updateOrderStatus(order.id, "completed")}
                 >
-                  ✓
+                  <Check className="w-4 h-4" />
                 </Button>
               )}
               {order.status !== "cancelled" && order.status !== "completed" && (
@@ -212,26 +201,12 @@ const AdminOrders = () => {
             </div>
           </div>
 
-          {/* Expand/Collapse Button */}
-          <button
-            onClick={() => toggleExpand(order.id)}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mt-3"
-          >
-            {isExpanded ? (
-              <>
-                <ChevronUp className="w-4 h-4" /> Hide items
-              </>
-            ) : (
-              <>
-                <ChevronDown className="w-4 h-4" /> Show {order.order_items?.length || 0} items
-              </>
-            )}
-          </button>
         </div>
 
-        {/* Order Items */}
-        {isExpanded && order.order_items && (
+        {/* Order Items - Always visible */}
+        {order.order_items && order.order_items.length > 0 && (
           <div className="border-t border-border bg-muted/30 p-4">
+            <p className="text-xs font-medium text-muted-foreground mb-2">Order Items:</p>
             <div className="space-y-2">
               {order.order_items.map((item) => (
                 <div
