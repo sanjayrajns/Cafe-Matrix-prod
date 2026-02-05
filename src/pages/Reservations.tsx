@@ -14,6 +14,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
+// Formspree endpoint
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mgolwldp";
+
 const timeSlots = [
   "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM",
   "2:00 PM", "2:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM",
@@ -75,6 +78,25 @@ const Reservations = () => {
       });
 
       if (error) throw error;
+
+      // Send to Formspree
+      await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "Reservation",
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          date: format(date, "MMMM d, yyyy"),
+          time: formData.time,
+          partySize: formData.partySize,
+          seatingPreference: formData.seatingPreference || "No preference",
+          occasion: formData.occasion || "Not specified",
+          dietaryNotes: formData.dietaryNotes || "None",
+          specialRequests: formData.specialRequests || "None",
+        }),
+      });
 
       setIsSuccess(true);
       toast({

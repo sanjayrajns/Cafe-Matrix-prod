@@ -13,7 +13,10 @@ import { supabase } from "@/integrations/supabase/client";
 type OrderType = "delivery" | "dine_in";
 
 // Configure your WhatsApp number here (include country code without + sign)
-const WHATSAPP_NUMBER = "919999999999"; // Replace with actual restaurant number
+const WHATSAPP_NUMBER = "918548049952";
+
+// Formspree endpoint
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mgolwldp";
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
@@ -135,6 +138,24 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
         .insert(orderItems);
 
       if (itemsError) throw itemsError;
+
+      // Send to Formspree
+      await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "Order",
+          orderType: orderType === "delivery" ? "Delivery" : "Dine-In",
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim() || "Not provided",
+          address: orderType === "delivery" ? formData.address.trim() : "N/A",
+          tableNumber: orderType === "dine_in" ? formData.tableNumber : "N/A",
+          items: items.map((item) => `${item.quantity}x ${item.name} - ₹${item.price * item.quantity}`).join(", "),
+          total: `₹${totalPrice}`,
+          specialInstructions: formData.specialInstructions.trim() || "None",
+        }),
+      });
 
       // Open WhatsApp with order details
       openWhatsApp();

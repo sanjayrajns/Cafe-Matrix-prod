@@ -27,22 +27,22 @@ const Menu = () => {
           </h2>
         </motion.div>
 
-        {/* Category Tabs - Scrollable */}
+        {/* Category Tabs - Grid Layout */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="mb-10 -mx-6 px-6"
+          className="mb-10"
         >
-          <div className="flex overflow-x-auto gap-2 pb-4 scrollbar-hide">
+          <div className="flex flex-wrap justify-center gap-3">
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`flex-shrink-0 px-4 py-2.5 text-sm font-medium transition-all duration-300 rounded-full whitespace-nowrap ${
+                className={`px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
                   activeCategory === cat.id
                     ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-card text-muted-foreground hover:text-foreground hover:bg-muted"
+                    : "bg-card text-muted-foreground hover:text-foreground hover:bg-muted border border-border"
                 }`}
               >
                 {cat.label}
@@ -67,8 +67,8 @@ const Menu = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03, duration: 0.3 }}
-                className={`flex items-center justify-between p-4 bg-card rounded-xl shadow-soft hover:shadow-medium transition-all group ${
-                  item.featured ? "border-l-4 border-accent" : ""
+                className={`flex items-center justify-between p-4 bg-card shadow-soft hover:shadow-medium transition-all group ${
+                  item.featured ? "border-l-4 border-accent" : "border border-border"
                 }`}
               >
                 <div className="flex-1 min-w-0">
