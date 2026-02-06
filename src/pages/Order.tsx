@@ -43,7 +43,7 @@ const Order = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className={`container mx-auto px-4 py-8 ${totalItems > 0 ? 'pb-32' : ''}`}>
         {/* Category Grid */}
         <div className="mb-8">
           <h2 className="font-display text-2xl text-foreground mb-6">Browse Categories</h2>
