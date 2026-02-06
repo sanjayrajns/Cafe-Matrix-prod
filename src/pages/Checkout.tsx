@@ -7,6 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -100,7 +107,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
     }
 
     // Validate required fields
-    if (!formData.name.trim() || !formData.phone.trim()) {
+    if (!formData.name.trim() || !formData.phone.trim() || !formData.email.trim()) {
       toast({ title: "Please fill in required fields", variant: "destructive" });
       return;
     }
@@ -402,7 +409,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email (optional)</Label>
+              <Label htmlFor="email">Email *</Label>
               <Input
                 id="email"
                 name="email"
@@ -410,6 +417,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="your@email.com"
+                required
                 maxLength={255}
               />
             </div>
@@ -431,16 +439,22 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
             ) : (
               <div className="space-y-2">
                 <Label htmlFor="tableNumber">Table Number *</Label>
-                <Input
-                  id="tableNumber"
-                  name="tableNumber"
-                  type="number"
-                  min="1"
+                <Select
                   value={formData.tableNumber}
-                  onChange={handleInputChange}
-                  placeholder="Enter table number"
+                  onValueChange={(value) => setFormData({ ...formData, tableNumber: value })}
                   required
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select table" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6].map((num) => (
+                      <SelectItem key={num} value={String(num)}>
+                        Table {num}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
