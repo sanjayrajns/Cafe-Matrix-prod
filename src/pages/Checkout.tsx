@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 type OrderType = "delivery" | "dine_in";
 
 // Configure your WhatsApp number here (include country code without + sign)
-const WHATSAPP_NUMBER = "918548049952";
+const WHATSAPP_NUMBER = "918431356962";
 
 // Formspree endpoint
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mgolwldp";
