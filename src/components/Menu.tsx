@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState } from "react";
+import { ShoppingBag } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { categories, menuItems, categoryImages } from "@/data/menuData";
 
 const Menu = () => {
@@ -83,7 +86,7 @@ const Menu = () => {
                 </div>
                 
                 <div className="flex items-center gap-3 ml-4">
-                  <span className="font-display text-lg text-accent font-medium whitespace-nowrap">
+                  <span className="font-display text-lg text-foreground font-semibold whitespace-nowrap">
                     ₹{item.price}
                   </span>
                 </div>
@@ -114,6 +117,21 @@ const Menu = () => {
             </div>
           </motion.div>
         </div>
+
+        {/* Order Now CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="text-center mt-12"
+        >
+          <Link to="/order">
+            <Button variant="hero" size="xl">
+              <ShoppingBag className="w-5 h-5 mr-2" />
+              Order Now
+            </Button>
+          </Link>
+        </motion.div>
       </div>
     </section>
   );

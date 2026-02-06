@@ -37,7 +37,8 @@ const Header = () => {
       >
         <div className="container mx-auto px-6 flex items-center justify-between">
           {/* Logo */}
-          <a href="#" className="relative z-10">
+          <a href="#" className="relative z-10 flex items-center gap-2">
+            <img src="/logo.png" alt="Matrix Cafe" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
             <h1 className="font-display text-2xl md:text-3xl font-semibold tracking-tight text-foreground">
               Matrix<span className="text-accent">.</span>
             </h1>
