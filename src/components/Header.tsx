@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, CalendarDays, ShoppingBag } from "lucide-react";
+import { Menu, X, CalendarDays, ShoppingBag, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -59,6 +59,12 @@ const Header = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
+            <Link to="/admin">
+              <Button variant="ghost" size="default">
+                <Shield className="w-4 h-4 mr-2" />
+                Admin
+              </Button>
+            </Link>
             <Link to="/order">
               <Button variant="outline" size="default">
                 <ShoppingBag className="w-4 h-4 mr-2" />
@@ -118,6 +124,12 @@ const Header = () => {
                 transition={{ delay: 0.4 }}
                 className="flex flex-col items-center gap-4"
               >
+                <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="xl">
+                    <Shield className="w-5 h-5 mr-2" />
+                    Admin
+                  </Button>
+                </Link>
                 <Link to="/order" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button variant="outline" size="xl">
                     <ShoppingBag className="w-5 h-5 mr-2" />
