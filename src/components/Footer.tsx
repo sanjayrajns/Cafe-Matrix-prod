@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Instagram, Facebook, Twitter, ArrowUpRight } from "lucide-react";
+import { Instagram, Facebook, ArrowUpRight } from "lucide-react";
 
 const footerLinks = [
   { label: "Menu", href: "#menu" },
@@ -9,9 +9,8 @@ const footerLinks = [
 ];
 
 const socialLinks = [
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Facebook, href: "#", label: "Facebook" },
-  { icon: Twitter, href: "#", label: "Twitter" },
+  { icon: Instagram, href: "https://www.instagram.com/cafe__matrix?igsh=MTZld29ydWoweTN6Ng==", label: "Instagram" },
+  { icon: Facebook, href: "https://www.facebook.com/share/18BF1R2CxA/", label: "Facebook" },
 ];
 
 const Footer = () => {
@@ -22,7 +21,7 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <h2 className="font-display text-3xl font-semibold mb-4">
-              Matrix<span className="text-accent">.</span>
+              Café Matrix<span className="text-accent">.</span>
             </h2>
             <p className="text-primary-foreground/60 leading-relaxed max-w-sm">
               Artisanal vegetarian cuisine in a cozy, welcoming atmosphere. 
