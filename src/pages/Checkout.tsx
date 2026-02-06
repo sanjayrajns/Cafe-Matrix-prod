@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Truck, UtensilsCrossed, CheckCircle, MessageCircle } from "lucide-react";
+import { ArrowLeft, Truck, UtensilsCrossed, CheckCircle, MessageCircle, Package } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +19,9 @@ const WHATSAPP_NUMBER = "918548049952";
 // Formspree endpoint
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mgolwldp";
 
+// Parcel charge amount
+const PARCEL_CHARGE = 10;
+
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
   const navigate = useNavigate();
@@ -26,6 +30,7 @@ const Checkout = () => {
   const [orderType, setOrderType] = useState<OrderType>("delivery");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [needsParcel, setNeedsParcel] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -35,6 +40,11 @@ const Checkout = () => {
     tableNumber: "",
     specialInstructions: "",
   });
+
+  // Parcel charge applies automatically for delivery, optionally for dine-in
+  const parcelApplies = orderType === "delivery" || (orderType === "dine_in" && needsParcel);
+  const parcelAmount = parcelApplies ? PARCEL_CHARGE : 0;
+  const grandTotal = totalPrice + parcelAmount;
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -47,11 +57,13 @@ const Checkout = () => {
       .map((item) => `${item.quantity}x ${item.name} - ₹${item.price * item.quantity}`)
       .join("\n");
 
+    const parcelInfo = parcelApplies ? `\n*Parcel Charges:* ₹${PARCEL_CHARGE}` : "";
+
     const orderDetails = `
 🍕 *NEW ORDER*
 ━━━━━━━━━━━━━━━
 
-*Order Type:* ${orderType === "delivery" ? "🚚 Delivery" : "🍽️ Dine-In"}
+*Order Type:* ${orderType === "delivery" ? "🚚 Delivery" : "🍽️ Dine-In"}${orderType === "dine_in" && needsParcel ? " (Parcel)" : ""}
 
 *Customer Details:*
 • Name: ${formData.name}
@@ -63,7 +75,8 @@ ${orderType === "delivery" ? `• Address: ${formData.address}` : `• Table No:
 ${itemsList}
 
 ━━━━━━━━━━━━━━━
-*Total: ₹${totalPrice}*
+*Subtotal: ₹${totalPrice}*${parcelInfo}
+*Total: ₹${grandTotal}*
 ━━━━━━━━━━━━━━━
 
 ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInstructions}` : ""}
@@ -116,7 +129,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
           address: orderType === "delivery" ? formData.address.trim() : null,
           table_number: orderType === "dine_in" ? parseInt(formData.tableNumber) : null,
           special_instructions: formData.specialInstructions.trim() || null,
-          total: totalPrice,
+          total: grandTotal,
           status: "pending",
         })
         .select()
@@ -145,14 +158,15 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "Order",
-          orderType: orderType === "delivery" ? "Delivery" : "Dine-In",
+          orderType: orderType === "delivery" ? "Delivery" : `Dine-In${needsParcel ? " (Parcel)" : ""}`,
           name: formData.name.trim(),
           phone: formData.phone.trim(),
           email: formData.email.trim() || "Not provided",
           address: orderType === "delivery" ? formData.address.trim() : "N/A",
           tableNumber: orderType === "dine_in" ? formData.tableNumber : "N/A",
           items: items.map((item) => `${item.quantity}x ${item.name} - ₹${item.price * item.quantity}`).join(", "),
-          total: `₹${totalPrice}`,
+          parcelCharges: parcelApplies ? `₹${PARCEL_CHARGE}` : "None",
+          total: `₹${grandTotal}`,
           specialInstructions: formData.specialInstructions.trim() || "None",
         }),
       });
@@ -236,7 +250,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
           </h2>
           <div className="grid grid-cols-2 gap-4">
             <button
-              onClick={() => setOrderType("delivery")}
+              onClick={() => { setOrderType("delivery"); setNeedsParcel(false); }}
               className={`p-6 rounded-xl border-2 transition-all ${
                 orderType === "delivery"
                   ? "border-primary bg-primary/5"
@@ -276,6 +290,30 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
           </div>
         </div>
 
+        {/* Parcel Toggle for Dine-In */}
+        {orderType === "dine_in" && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-6"
+          >
+            <div className="bg-card rounded-xl p-4 shadow-soft border border-border flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Package className="w-5 h-5 text-accent" />
+                <div>
+                  <p className="font-medium text-foreground text-sm">Need Parcel?</p>
+                  <p className="text-xs text-muted-foreground">Parcel charges of ₹{PARCEL_CHARGE} will apply</p>
+                </div>
+              </div>
+              <Switch
+                checked={needsParcel}
+                onCheckedChange={setNeedsParcel}
+              />
+            </div>
+          </motion.div>
+        )}
+
         {/* Order Summary */}
         <div className="bg-card rounded-xl p-4 mb-6 shadow-soft">
           <h3 className="font-medium text-foreground mb-3">Order Summary</h3>
@@ -289,13 +327,36 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
               </div>
             ))}
           </div>
-          <div className="border-t border-border mt-3 pt-3">
-            <div className="flex justify-between font-semibold">
+          <div className="border-t border-border mt-3 pt-3 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="text-foreground">₹{totalPrice}</span>
+            </div>
+            {parcelApplies && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground flex items-center gap-1">
+                  <Package className="w-3 h-3" />
+                  Parcel Charges
+                </span>
+                <span className="text-foreground">₹{PARCEL_CHARGE}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-semibold border-t border-border pt-2">
               <span>Total</span>
-              <span className="text-primary">₹{totalPrice}</span>
+              <span className="text-primary">₹{grandTotal}</span>
             </div>
           </div>
         </div>
+
+        {/* Parcel info for delivery */}
+        {orderType === "delivery" && (
+          <div className="bg-accent/10 border border-accent/20 rounded-xl p-3 mb-4 flex items-center gap-3">
+            <Package className="w-5 h-5 text-accent flex-shrink-0" />
+            <p className="text-xs text-foreground">
+              Parcel charges of ₹{PARCEL_CHARGE} are applied for delivery orders.
+            </p>
+          </div>
+        )}
 
         {/* WhatsApp Notice */}
         <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6 flex items-center gap-3">
@@ -405,7 +466,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
             disabled={isSubmitting}
           >
             <MessageCircle className="w-5 h-5 mr-2" />
-            {isSubmitting ? "Processing..." : `Order via WhatsApp • ₹${totalPrice}`}
+            {isSubmitting ? "Processing..." : `Order via WhatsApp • ₹${grandTotal}`}
           </Button>
         </form>
       </main>
