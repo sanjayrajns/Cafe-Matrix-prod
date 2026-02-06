@@ -37,7 +37,7 @@ const Hero = () => {
             transition={{ delay: 0.2, duration: 0.6 }}
             className="inline-block px-4 py-2 mb-8 text-xs uppercase tracking-[0.3em] text-primary-foreground/80 border border-primary-foreground/20 rounded-full backdrop-blur-sm"
           >
-            100% Vegetarian • Since 2020
+            100% Vegetarian • Since 2023
           </motion.span>
 
           {/* Main Title */}
@@ -70,8 +70,8 @@ const Hero = () => {
             <Button variant="accent" size="xl" asChild>
               <a href="/order">Order Now</a>
             </Button>
-            <Button variant="glass" size="xl">
-              Reserve a Table
+            <Button variant="glass" size="xl" asChild>
+              <a href="/reservations">On Spot</a>
             </Button>
           </motion.div>
         </motion.div>

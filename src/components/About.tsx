@@ -43,7 +43,7 @@ const About = () => {
               transition={{ delay: 0.4, duration: 0.6 }}
               className="absolute -bottom-8 -right-8 bg-accent text-accent-foreground p-8 shadow-dramatic"
             >
-              <p className="font-display text-4xl font-semibold">5+</p>
+              <p className="font-display text-4xl font-semibold">3+</p>
               <p className="text-sm uppercase tracking-wider">Years of Joy</p>
             </motion.div>
           </motion.div>
