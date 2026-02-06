@@ -122,9 +122,6 @@ const Admin = () => {
               </Button>
             </form>
 
-            <p className="text-center text-xs text-muted-foreground mt-6">
-              Default password: matrix2024
-            </p>
           </div>
         </motion.div>
       </div>
