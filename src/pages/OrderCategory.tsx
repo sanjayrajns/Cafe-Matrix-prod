@@ -65,7 +65,7 @@ const OrderCategory = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className={`container mx-auto px-4 py-8 ${totalItems > 0 ? 'pb-32' : ''}`}>
         {/* Category Header */}
         <div className="relative rounded-2xl overflow-hidden mb-6 h-48">
           <img
