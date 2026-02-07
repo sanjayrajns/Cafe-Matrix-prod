@@ -32,6 +32,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { orderCategories } from "@/data/orderMenuData";
+import { playToastSound } from "@/hooks/useToastSound";
 
 interface MenuItem {
   id: string;
@@ -73,6 +74,7 @@ const AdminMenuItems = () => {
     } catch (error) {
       console.error("Error fetching menu items:", error);
       toast({ title: "Failed to load menu items", variant: "destructive" });
+      playToastSound();
     } finally {
       setIsLoading(false);
     }
@@ -103,12 +105,14 @@ const AdminMenuItems = () => {
       if (error) throw error;
 
       toast({ title: "Menu item added successfully!" });
+      playToastSound();
       setNewItem({ name: "", price: "", category: "", image_url: "" });
       setIsAddDialogOpen(false);
       fetchMenuItems();
     } catch (error) {
       console.error("Error adding menu item:", error);
       toast({ title: "Failed to add menu item", variant: "destructive" });
+      playToastSound();
     } finally {
       setIsSubmitting(false);
     }
@@ -124,10 +128,12 @@ const AdminMenuItems = () => {
       if (error) throw error;
 
       toast({ title: "Menu item deleted" });
+      playToastSound();
       fetchMenuItems();
     } catch (error) {
       console.error("Error deleting menu item:", error);
       toast({ title: "Failed to delete menu item", variant: "destructive" });
+      playToastSound();
     }
   };
 
@@ -148,6 +154,7 @@ const AdminMenuItems = () => {
     } catch (error) {
       console.error("Error updating availability:", error);
       toast({ title: "Failed to update item", variant: "destructive" });
+      playToastSound();
     }
   };
 

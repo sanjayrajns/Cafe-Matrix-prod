@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { playToastSound } from "@/hooks/useToastSound";
 
 interface Reservation {
   id: string;
@@ -54,10 +55,12 @@ const AdminReservations = () => {
 
     if (error) {
       toast({ title: "Failed to update", variant: "destructive" });
+      playToastSound();
       return;
     }
 
     toast({ title: `Reservation ${status}` });
+    playToastSound();
     fetchReservations();
   };
 
@@ -69,10 +72,12 @@ const AdminReservations = () => {
 
     if (error) {
       toast({ title: "Failed to delete", variant: "destructive" });
+      playToastSound();
       return;
     }
 
     toast({ title: "Reservation deleted" });
+    playToastSound();
     fetchReservations();
   };
 

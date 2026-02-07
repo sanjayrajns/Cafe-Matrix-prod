@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { useOrderNotification } from "@/hooks/useOrderNotification";
+import { playToastSound } from "@/hooks/useToastSound";
 
 interface OrderItem {
   id: string;
@@ -80,10 +81,12 @@ const AdminOrders = () => {
 
     if (error) {
       toast({ title: "Failed to update status", variant: "destructive" });
+      playToastSound();
       return;
     }
 
     toast({ title: `Order ${status}` });
+    playToastSound();
     fetchOrders();
   };
 
@@ -92,10 +95,12 @@ const AdminOrders = () => {
 
     if (error) {
       toast({ title: "Failed to delete order", variant: "destructive" });
+      playToastSound();
       return;
     }
 
     toast({ title: "Order deleted" });
+    playToastSound();
     fetchOrders();
   };
 
