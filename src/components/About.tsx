@@ -2,10 +2,10 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { Coffee, Leaf, Heart, Users } from "lucide-react";
-import ambienceImg from "@/assets/ambience.jpg";
+import aboutInteriorImg from "@/assets/about-interior.png";
 
 const highlights = [
-  { icon: Coffee, label: "Great Coffee", description: "Specialty brews daily" },
+  { icon: Coffee, label: "Great Coffee & Food", description: "Specialty brews daily" },
   { icon: Leaf, label: "100% Vegetarian", description: "Plant-based goodness" },
   { icon: Heart, label: "Made with Love", description: "Fresh ingredients" },
   { icon: Users, label: "Family Friendly", description: "Space for everyone" },
@@ -29,7 +29,7 @@ const About = () => {
           >
             <div className="relative aspect-[4/5] overflow-hidden">
               <img
-                src={ambienceImg}
+                src={aboutInteriorImg}
                 alt="Matrix Cafe Interior"
                 className="w-full h-full object-cover"
               />

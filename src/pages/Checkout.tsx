@@ -369,7 +369,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
         <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6 flex items-center gap-3">
           <MessageCircle className="w-6 h-6 text-primary flex-shrink-0" />
           <p className="text-sm text-foreground">
-            Your order will be sent via WhatsApp for quick confirmation.
+            Your order will be sent for quick confirmation.
           </p>
         </div>
 
@@ -480,7 +480,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
             disabled={isSubmitting}
           >
             <MessageCircle className="w-5 h-5 mr-2" />
-            {isSubmitting ? "Processing..." : `Order via WhatsApp • ₹${grandTotal}`}
+            {isSubmitting ? "Processing..." : `Order • ₹${grandTotal}`}
           </Button>
         </form>
       </main>

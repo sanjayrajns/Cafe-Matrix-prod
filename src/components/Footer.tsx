@@ -72,10 +72,19 @@ const Footer = () => {
         {/* Bottom */}
         <div className="pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/40">
-            © 2024 Matrix Cafe. All rights reserved.
+            © 2027 Matrix Cafe. All rights reserved.
           </p>
           <p className="text-sm text-primary-foreground/40">
-            Made with ♥ in Sira
+            Built by{" "}
+            <a
+              href="https://sajeevnetworksolutions.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent hover:text-accent/80 transition-colors underline"
+            >
+              Sajeev Network Solutions
+            </a>{" "}
+            with ❤️ in Sira 📍
           </p>
         </div>
       </div>
