@@ -86,7 +86,7 @@ const Menu = () => {
                 </div>
                 
                 <div className="flex items-center gap-3 ml-4">
-                  <span className="font-display text-lg text-foreground font-semibold whitespace-nowrap">
+                  <span className="font-mono text-lg text-foreground font-bold whitespace-nowrap tracking-tight">
                     ₹{item.price}
                   </span>
                 </div>
