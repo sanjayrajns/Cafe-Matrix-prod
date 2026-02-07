@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 const amenities = [
   { icon: Wifi, label: "Free WiFi" },
   { icon: Car, label: "Free Parking" },
-  { icon: CreditCard, label: "NFC Payments" },
+  { icon: CreditCard, label: "UPI Payments" },
 ];
 
 const Visit = () => {

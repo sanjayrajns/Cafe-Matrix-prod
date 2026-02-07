@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeroParallax } from "@/hooks/useParallax";
-import heroBg from "@/assets/hero-bg.jpg";
+import heroBg from "@/assets/hero-bg-new.png";
 
 const Hero = () => {
   const { backgroundY, contentY, opacity } = useHeroParallax();
