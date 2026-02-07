@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Truck, UtensilsCrossed, Check, X, Clock, Trash2, MapPin, ChefHat } from "lucide-react";
+import { Truck, UtensilsCrossed, Check, X, Clock, Trash2, MapPin, ChefHat, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { useOrderNotification } from "@/hooks/useOrderNotification";
 
 interface OrderItem {
   id: string;
@@ -34,9 +35,9 @@ interface Order {
 const AdminOrders = () => {
   const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
-  
+  const [notificationEnabled, setNotificationEnabled] = useState(true);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     const { data, error } = await supabase
       .from("orders")
       .select("*")
@@ -59,11 +60,17 @@ const AdminOrders = () => {
     );
 
     setOrders(ordersWithItems);
-  };
+  }, []);
+
+  const { setEnabled } = useOrderNotification(fetchOrders);
+
+  useEffect(() => {
+    setEnabled(notificationEnabled);
+  }, [notificationEnabled, setEnabled]);
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [fetchOrders]);
 
   const updateOrderStatus = async (id: string, status: string) => {
     const { error } = await supabase
@@ -248,11 +255,21 @@ const AdminOrders = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <h2 className="font-display text-2xl text-foreground">Orders</h2>
-        <Button variant="outline" size="sm" onClick={fetchOrders}>
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={notificationEnabled ? "outline" : "ghost"}
+            size="sm"
+            onClick={() => setNotificationEnabled(!notificationEnabled)}
+            title={notificationEnabled ? "Mute notifications" : "Unmute notifications"}
+          >
+            {notificationEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+          </Button>
+          <Button variant="outline" size="sm" onClick={fetchOrders}>
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="delivery" className="space-y-4">

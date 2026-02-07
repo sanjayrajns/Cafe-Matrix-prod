@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Lock, LogOut, CalendarDays, ShoppingBag, UtensilsCrossed, Settings } from "lucide-react";
+import { Lock, LogOut, CalendarDays, ShoppingBag, UtensilsCrossed, Settings, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AdminReservations from "@/components/admin/AdminReservations";
 import AdminOrders from "@/components/admin/AdminOrders";
 import AdminMenuItems from "@/components/admin/AdminMenuItems";
+import AdminAnalytics from "@/components/admin/AdminAnalytics";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -148,10 +149,14 @@ const Admin = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full max-w-lg grid-cols-4">
+          <TabsList className="grid w-full max-w-2xl grid-cols-5">
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ShoppingBag className="w-4 h-4" />
               <span className="hidden sm:inline">Orders</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
             <TabsTrigger value="reservations" className="flex items-center gap-2">
               <CalendarDays className="w-4 h-4" />
@@ -170,6 +175,11 @@ const Admin = () => {
           {/* Orders Tab */}
           <TabsContent value="orders">
             <AdminOrders />
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            <AdminAnalytics />
           </TabsContent>
 
           {/* Reservations Tab */}

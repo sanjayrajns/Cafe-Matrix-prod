@@ -6,12 +6,14 @@ import mojitoImg from "@/assets/mojito.png";
 import potatoImg from "@/assets/potato-spiral.png";
 import ambienceImg from "@/assets/ambience.jpg";
 import vibeInteriorImg from "@/assets/vibe-interior.png";
+import pizzaCornImg from "@/assets/gallery-pizza-corn.png";
 
 const galleryItems = [
   { src: pizzaImg, alt: "Signature Pizza", span: "col-span-2 row-span-2" },
   { src: mojitoImg, alt: "Fresh Mojito", span: "col-span-1 row-span-1" },
   { src: vibeInteriorImg, alt: "Our Vibe", span: "col-span-1 row-span-2" },
   { src: potatoImg, alt: "Spiral Potato", span: "col-span-1 row-span-1" },
+  { src: pizzaCornImg, alt: "Cheese Corn Pizza", span: "col-span-1 row-span-1" },
 ];
 
 const ParallaxImage = ({ src, alt, span, index }: { src: string; alt: string; span: string; index: number }) => {
