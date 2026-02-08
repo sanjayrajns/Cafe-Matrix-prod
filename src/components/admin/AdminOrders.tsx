@@ -176,10 +176,10 @@ const AdminOrders = () => {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="text-accent"
+                  className="text-foreground"
                   onClick={() => updateOrderStatus(order.id, "preparing")}
                 >
-                  <ChefHat className="w-4 h-4" />
+                  <ChefHat className="w-4 h-4 text-foreground" />
                 </Button>
               )}
               {order.status === "preparing" && (
