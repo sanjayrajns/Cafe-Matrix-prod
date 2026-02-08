@@ -111,7 +111,7 @@ const Admin = () => {
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
-                  type="password"
+                  type="text"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter admin password"

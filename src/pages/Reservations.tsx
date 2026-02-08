@@ -28,7 +28,7 @@ const occasions = [
   "Family Gathering", "Celebration", "Other"
 ];
 
-const seatingOptions = ["Indoor", "Outdoor", "Window Seat", "Private Room", "No Preference"];
+const seatingOptions = ["Indoor", "Outdoor", "Window Seat", "Private Hall", "No Preference"];
 
 const Reservations = () => {
   const { toast } = useToast();
@@ -359,7 +359,7 @@ const Reservations = () => {
 
           <p className="text-center text-sm text-muted-foreground">
             For parties larger than 10, please call us at{" "}
-            <a href="tel:+919876543210" className="text-accent hover:underline">
+            <a href="tel:+919876543210" className="text-foreground font-medium hover:underline">
               +91 98765 43210
             </a>
           </p>

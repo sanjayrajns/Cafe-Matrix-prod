@@ -39,7 +39,7 @@ const Header = () => {
           {/* Logo */}
           <a href="#" className="relative z-10 flex items-center gap-2">
             <img src="/logo.png" alt="Matrix Cafe" className="w-8 h-8 md:w-10 md:h-10 object-cover rounded-full" />
-            <h1 className="font-display text-xl md:text-2xl font-semibold tracking-tight text-foreground">
+            <h1 className="font-display text-xl md:text-2xl font-semibold tracking-tight text-white">
               Café Matrix<span className="text-accent">.</span>
             </h1>
           </a>
