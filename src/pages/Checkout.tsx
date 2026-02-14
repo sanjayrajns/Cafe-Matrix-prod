@@ -26,8 +26,12 @@ const WHATSAPP_NUMBER = "918431356962";
 // Formspree endpoint
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mgolwldp";
 
-// Parcel charge amount
-const PARCEL_CHARGE = 10;
+// Per-item parcel charges by category
+const PARCEL_RATES: Record<string, number> = {
+  pizza: 10,
+  burger: 5,
+};
+const DEFAULT_PARCEL_RATE = 10;
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
@@ -48,9 +52,17 @@ const Checkout = () => {
     specialInstructions: "",
   });
 
+  // Calculate per-item parcel charges
+  const calculateParcelCharges = () => {
+    return items.reduce((total, item) => {
+      const rate = PARCEL_RATES[item.category.toLowerCase()] ?? DEFAULT_PARCEL_RATE;
+      return total + rate * item.quantity;
+    }, 0);
+  };
+
   // Parcel charge applies automatically for delivery, optionally for dine-in
   const parcelApplies = orderType === "delivery" || (orderType === "dine_in" && needsParcel);
-  const parcelAmount = parcelApplies ? PARCEL_CHARGE : 0;
+  const parcelAmount = parcelApplies ? calculateParcelCharges() : 0;
   const grandTotal = totalPrice + parcelAmount;
 
   const handleInputChange = (
@@ -64,7 +76,7 @@ const Checkout = () => {
       .map((item) => `${item.quantity}x ${item.name} - ₹${item.price * item.quantity}`)
       .join("\n");
 
-    const parcelInfo = parcelApplies ? `\n*Parcel Charges:* ₹${PARCEL_CHARGE}` : "";
+    const parcelInfo = parcelApplies ? `\n*Parcel Charges:* ₹${parcelAmount}` : "";
 
     const orderDetails = `
 🍕 *NEW ORDER*
@@ -172,7 +184,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
           address: orderType === "delivery" ? formData.address.trim() : "N/A",
           tableNumber: orderType === "dine_in" ? formData.tableNumber : "N/A",
           items: items.map((item) => `${item.quantity}x ${item.name} - ₹${item.price * item.quantity}`).join(", "),
-          parcelCharges: parcelApplies ? `₹${PARCEL_CHARGE}` : "None",
+          parcelCharges: parcelApplies ? `₹${parcelAmount}` : "None",
           total: `₹${grandTotal}`,
           specialInstructions: formData.specialInstructions.trim() || "None",
         }),
@@ -310,7 +322,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
                 <Package className="w-5 h-5 text-accent" />
                 <div>
                   <p className="font-medium text-foreground text-sm">Need Parcel?</p>
-                  <p className="text-xs text-muted-foreground">Parcel charges of ₹{PARCEL_CHARGE} will apply</p>
+                  <p className="text-xs text-muted-foreground">Per-item parcel charges will apply</p>
                 </div>
               </div>
               <Switch
@@ -345,7 +357,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
                   <Package className="w-3 h-3" />
                   Parcel Charges
                 </span>
-                <span className="text-foreground">₹{PARCEL_CHARGE}</span>
+                <span className="text-foreground">₹{parcelAmount}</span>
               </div>
             )}
             <div className="flex justify-between font-semibold border-t border-border pt-2">
@@ -360,7 +372,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
           <div className="bg-accent/10 border border-accent/20 rounded-xl p-3 mb-4 flex items-center gap-3">
             <Package className="w-5 h-5 text-accent flex-shrink-0" />
             <p className="text-xs text-foreground">
-              Parcel charges of ₹{PARCEL_CHARGE} are applied for delivery orders.
+              Per-item parcel charges are applied for delivery orders (Pizza ₹10, Burger ₹5, Others ₹10).
             </p>
           </div>
         )}
