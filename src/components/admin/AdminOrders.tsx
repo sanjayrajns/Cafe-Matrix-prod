@@ -124,12 +124,17 @@ const AdminOrders = () => {
   const dineInOrders = orders.filter((o) => o.order_type === "dine_in");
 
   const renderOrderCard = (order: Order) => {
+    const isPending = order.status === "pending";
     return (
       <motion.div
         key={order.id}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="bg-card rounded-xl shadow-soft overflow-hidden"
+        className={`rounded-xl shadow-soft overflow-hidden border ${
+          isPending
+            ? "bg-accent/10 border-accent/30 ring-1 ring-accent/20"
+            : "bg-card border-border"
+        }`}
       >
         <div className="p-4">
           <div className="flex flex-wrap items-start justify-between gap-4">
