@@ -263,30 +263,11 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
 
       <main className="container mx-auto px-4 py-6 max-w-2xl">
         {/* Order Type Selection */}
-        <div className="mb-8">
+        <div className="mb-8 bg-card rounded-xl p-6 shadow-soft border border-border">
           <h2 className="font-display text-lg text-foreground mb-4">
             How would you like to order?
           </h2>
           <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={() => { setOrderType("delivery"); setNeedsParcel(false); }}
-              className={`p-6 rounded-xl border-2 transition-all ${
-                orderType === "delivery"
-                  ? "border-primary bg-primary/5"
-                  : "border-border bg-card hover:border-muted-foreground"
-              }`}
-            >
-              <Truck
-                className={`w-8 h-8 mx-auto mb-2 ${
-                  orderType === "delivery" ? "text-primary" : "text-muted-foreground"
-                }`}
-              />
-              <p className={`font-medium ${
-                orderType === "delivery" ? "text-primary" : "text-foreground"
-              }`}>
-                Delivery
-              </p>
-            </button>
             <button
               onClick={() => setOrderType("dine_in")}
               className={`p-6 rounded-xl border-2 transition-all ${
@@ -304,6 +285,25 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
                 orderType === "dine_in" ? "text-primary" : "text-foreground"
               }`}>
                 Dine In
+              </p>
+            </button>
+            <button
+              onClick={() => { setOrderType("delivery"); setNeedsParcel(false); }}
+              className={`p-6 rounded-xl border-2 transition-all ${
+                orderType === "delivery"
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-card hover:border-muted-foreground"
+              }`}
+            >
+              <Truck
+                className={`w-8 h-8 mx-auto mb-2 ${
+                  orderType === "delivery" ? "text-primary" : "text-muted-foreground"
+                }`}
+              />
+              <p className={`font-medium ${
+                orderType === "delivery" ? "text-primary" : "text-foreground"
+              }`}>
+                Delivery
               </p>
             </button>
           </div>
