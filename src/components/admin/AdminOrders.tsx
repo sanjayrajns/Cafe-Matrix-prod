@@ -125,6 +125,7 @@ const AdminOrders = () => {
 
   const renderOrderCard = (order: Order) => {
     const isPending = order.status === "pending";
+    const isComplete = order.status === "complete";
     return (
       <motion.div
         key={order.id}
@@ -133,6 +134,8 @@ const AdminOrders = () => {
         className={`rounded-xl shadow-soft overflow-hidden border ${
           isPending
             ? "bg-accent/10 border-accent/30 ring-1 ring-accent/20"
+            : isComplete
+            ? "bg-foreground/90 border-foreground/50 text-background"
             : "bg-card border-border"
         }`}
       >
