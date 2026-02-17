@@ -1,22 +1,52 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Plus, Minus, ArrowLeft } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
-import { orderCategories, getItemsByCategory } from "@/data/orderMenuData";
+import { orderCategories, getItemsByCategory, MenuItem } from "@/data/orderMenuData";
+
+const SizeSelector = ({
+  item,
+  onAdd,
+}: {
+  item: MenuItem;
+  onAdd: (sizeLabel: string, price: number) => void;
+}) => {
+  return (
+    <div className="flex gap-1.5 flex-wrap">
+      {item.sizes!.map((size) => (
+        <button
+          key={size.label}
+          onClick={() => onAdd(size.label, size.price)}
+          className="flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg border border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors text-xs"
+        >
+          <span className="text-muted-foreground">{size.label}</span>
+          <span className="font-mono font-bold text-foreground">₹{size.price}</span>
+        </button>
+      ))}
+    </div>
+  );
+};
 
 const OrderCategory = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { items: cartItems, addItem, updateQuantity, totalItems, totalPrice } = useCart();
   const navigate = useNavigate();
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
   const categoryItems = getItemsByCategory(categoryId || "");
   const currentCategory = orderCategories.find((c) => c.id === categoryId);
 
   const getItemQuantity = (itemId: string) => {
-    const item = cartItems.find((i) => i.id === itemId);
-    return item?.quantity || 0;
+    // For items with sizes, aggregate all size variants
+    const matching = cartItems.filter((i) => i.id.startsWith(itemId + "-size-") || i.id === itemId);
+    return matching.reduce((sum, i) => sum + i.quantity, 0);
+  };
+
+  const getCartItemsForBase = (itemId: string) => {
+    return cartItems.filter((i) => i.id.startsWith(itemId + "-size-") || i.id === itemId);
   };
 
   if (!currentCategory) {
@@ -93,7 +123,10 @@ const OrderCategory = () => {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
           >
             {categoryItems.map((item) => {
-              const quantity = getItemQuantity(item.id);
+              const hasSizes = item.sizes && item.sizes.length > 0;
+              const totalQty = getItemQuantity(item.id);
+              const sizeCartItems = getCartItemsForBase(item.id);
+
               return (
                 <motion.div
                   key={item.id}
@@ -112,44 +145,108 @@ const OrderCategory = () => {
                       <h3 className="font-medium text-foreground">
                         {item.name}
                       </h3>
-                      <p className="text-primary font-semibold whitespace-nowrap">₹{item.price}</p>
+                      {hasSizes ? (
+                        <p className="text-primary font-semibold whitespace-nowrap text-xs">
+                          From ₹{item.sizes![0].price}
+                        </p>
+                      ) : (
+                        <p className="text-primary font-semibold whitespace-nowrap">₹{item.price}</p>
+                      )}
                     </div>
+
+                    {/* Size cart items display */}
+                    {hasSizes && sizeCartItems.length > 0 && (
+                      <div className="mb-2 space-y-1">
+                        {sizeCartItems.map((ci) => (
+                          <div key={ci.id} className="flex items-center justify-between text-xs bg-primary/5 rounded-lg px-2 py-1">
+                            <span className="text-muted-foreground">{ci.name}</span>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => updateQuantity(ci.id, ci.quantity - 1)}
+                                className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary/30"
+                              >
+                                <Minus className="w-3 h-3 text-primary" />
+                              </button>
+                              <span className="w-4 text-center font-medium text-foreground">{ci.quantity}</span>
+                              <button
+                                onClick={() => updateQuantity(ci.id, ci.quantity + 1)}
+                                className="w-5 h-5 rounded-full bg-primary flex items-center justify-center hover:bg-primary/90"
+                              >
+                                <Plus className="w-3 h-3 text-primary-foreground" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-end">
-                      {quantity > 0 ? (
-                        <div className="flex items-center gap-2 bg-primary/10 rounded-full px-2 py-1">
-                          <button
-                            onClick={() => updateQuantity(item.id, quantity - 1)}
-                            className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary/30 transition-colors"
-                          >
-                            <Minus className="w-4 h-4 text-primary" />
-                          </button>
-                          <span className="w-6 text-center font-medium text-foreground">
-                            {quantity}
-                          </span>
-                          <button
-                            onClick={() => updateQuantity(item.id, quantity + 1)}
-                            className="w-7 h-7 rounded-full bg-primary flex items-center justify-center hover:bg-primary/90 transition-colors"
-                          >
-                            <Plus className="w-4 h-4 text-primary-foreground" />
-                          </button>
+                      {hasSizes ? (
+                        <div>
+                          {expandedItem === item.id ? (
+                            <SizeSelector
+                              item={item}
+                              onAdd={(sizeLabel, price) => {
+                                addItem({
+                                  id: `${item.id}-size-${sizeLabel.toLowerCase()}`,
+                                  name: `${item.name} (${sizeLabel})`,
+                                  category: item.category,
+                                  price,
+                                  image: item.image,
+                                });
+                                setExpandedItem(null);
+                              }}
+                            />
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setExpandedItem(item.id)}
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              {totalQty > 0 ? `Add More (${totalQty})` : "Add"}
+                            </Button>
+                          )}
                         </div>
                       ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            addItem({
-                              id: item.id,
-                              name: item.name,
-                              category: item.category,
-                              price: item.price,
-                              image: item.image,
-                            })
-                          }
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Add
-                        </Button>
+                        <>
+                          {totalQty > 0 ? (
+                            <div className="flex items-center gap-2 bg-primary/10 rounded-full px-2 py-1">
+                              <button
+                                onClick={() => updateQuantity(item.id, totalQty - 1)}
+                                className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary/30 transition-colors"
+                              >
+                                <Minus className="w-4 h-4 text-primary" />
+                              </button>
+                              <span className="w-6 text-center font-medium text-foreground">
+                                {totalQty}
+                              </span>
+                              <button
+                                onClick={() => updateQuantity(item.id, totalQty + 1)}
+                                className="w-7 h-7 rounded-full bg-primary flex items-center justify-center hover:bg-primary/90 transition-colors"
+                              >
+                                <Plus className="w-4 h-4 text-primary-foreground" />
+                              </button>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                addItem({
+                                  id: item.id,
+                                  name: item.name,
+                                  category: item.category,
+                                  price: item.price,
+                                  image: item.image,
+                                })
+                              }
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              Add
+                            </Button>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
