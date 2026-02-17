@@ -132,6 +132,11 @@ import pastryDoughnuts from "@/assets/menu-items/pastry-doughnuts.jpg";
 import pastryChocolava from "@/assets/menu-items/pastry-chocolava.jpg";
 import pastryMousse from "@/assets/menu-items/pastry-mousse.jpg";
 
+export interface SizeOption {
+  label: string;
+  price: number;
+}
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -139,6 +144,7 @@ export interface MenuItem {
   category: string;
   categoryLabel: string;
   image: string;
+  sizes?: SizeOption[];
 }
 
 export const orderCategories = [
@@ -159,18 +165,18 @@ export const orderCategories = [
 
 // Menu items with individual images
 export const orderMenuItems: MenuItem[] = [
-  // Pizza
-  { id: "pizza-0", name: "Margarita Pizza", price: 99, category: "pizza", categoryLabel: "Pizza", image: pizzaMargarita },
-  { id: "pizza-1", name: "Cheese Corn", price: 160, category: "pizza", categoryLabel: "Pizza", image: pizzaCheeseCorn },
-  { id: "pizza-2", name: "Garden Fresh", price: 180, category: "pizza", categoryLabel: "Pizza", image: pizzaGardenFresh },
-  { id: "pizza-3", name: "Corn Capsicum Onion", price: 190, category: "pizza", categoryLabel: "Pizza", image: pizzaCornCapsicum },
-  { id: "pizza-4", name: "Veg Loaded", price: 220, category: "pizza", categoryLabel: "Pizza", image: pizzaVegLoaded },
-  { id: "pizza-5", name: "Spicy Paneer", price: 230, category: "pizza", categoryLabel: "Pizza", image: pizzaSpicyPaneer },
-  { id: "pizza-6", name: "Paneer Tikka", price: 240, category: "pizza", categoryLabel: "Pizza", image: pizzaPaneerTikka },
-  { id: "pizza-7", name: "BBQ Paneer", price: 250, category: "pizza", categoryLabel: "Pizza", image: pizzaBbqPaneer },
-  { id: "pizza-8", name: "Mushroom Pizza", price: 220, category: "pizza", categoryLabel: "Pizza", image: pizzaMushroom },
-  { id: "pizza-9", name: "Matrix Special", price: 260, category: "pizza", categoryLabel: "Pizza", image: pizzaMatrixSpecial },
-  { id: "pizza-10", name: "Extra Cheese / Topping", price: 40, category: "pizza", categoryLabel: "Pizza", image: pizzaExtraCheese },
+  // Pizza (with size variants)
+  { id: "pizza-0", name: "Margarita Pizza", price: 99, category: "pizza", categoryLabel: "Pizza", image: pizzaMargarita, sizes: [{ label: "Regular", price: 99 }, { label: "Medium", price: 210 }, { label: "Large", price: 320 }] },
+  { id: "pizza-1", name: "Cheese Corn", price: 160, category: "pizza", categoryLabel: "Pizza", image: pizzaCheeseCorn, sizes: [{ label: "Regular", price: 160 }, { label: "Medium", price: 240 }, { label: "Large", price: 340 }] },
+  { id: "pizza-2", name: "Garden Fresh", price: 180, category: "pizza", categoryLabel: "Pizza", image: pizzaGardenFresh, sizes: [{ label: "Regular", price: 180 }, { label: "Medium", price: 280 }, { label: "Large", price: 380 }] },
+  { id: "pizza-3", name: "Corn Capsicum Onion", price: 190, category: "pizza", categoryLabel: "Pizza", image: pizzaCornCapsicum, sizes: [{ label: "Regular", price: 190 }, { label: "Medium", price: 280 }, { label: "Large", price: 360 }] },
+  { id: "pizza-4", name: "Veg Loaded", price: 190, category: "pizza", categoryLabel: "Pizza", image: pizzaVegLoaded, sizes: [{ label: "Regular", price: 190 }, { label: "Medium", price: 260 }, { label: "Large", price: 380 }] },
+  { id: "pizza-5", name: "Spicy Paneer", price: 230, category: "pizza", categoryLabel: "Pizza", image: pizzaSpicyPaneer, sizes: [{ label: "Regular", price: 230 }, { label: "Medium", price: 280 }, { label: "Large", price: 430 }] },
+  { id: "pizza-6", name: "Paneer Tikka", price: 230, category: "pizza", categoryLabel: "Pizza", image: pizzaPaneerTikka, sizes: [{ label: "Regular", price: 230 }, { label: "Medium", price: 280 }, { label: "Large", price: 430 }] },
+  { id: "pizza-7", name: "BBQ Paneer", price: 250, category: "pizza", categoryLabel: "Pizza", image: pizzaBbqPaneer, sizes: [{ label: "Regular", price: 250 }, { label: "Medium", price: 330 }, { label: "Large", price: 440 }] },
+  { id: "pizza-8", name: "Mushroom Pizza", price: 250, category: "pizza", categoryLabel: "Pizza", image: pizzaMushroom, sizes: [{ label: "Regular", price: 250 }, { label: "Medium", price: 330 }, { label: "Large", price: 440 }] },
+  { id: "pizza-9", name: "Matrix Special", price: 260, category: "pizza", categoryLabel: "Pizza", image: pizzaMatrixSpecial, sizes: [{ label: "Regular", price: 260 }, { label: "Medium", price: 340 }, { label: "Large", price: 460 }] },
+  { id: "pizza-10", name: "Extra Cheese / Topping", price: 40, category: "pizza", categoryLabel: "Pizza", image: pizzaExtraCheese, sizes: [{ label: "Regular", price: 40 }, { label: "Medium", price: 55 }, { label: "Large", price: 65 }] },
 
   // Burgers
   { id: "burgers-0", name: "Classic Veg Burger", price: 69, category: "burgers", categoryLabel: "Burgers", image: burgerClassicVeg },
