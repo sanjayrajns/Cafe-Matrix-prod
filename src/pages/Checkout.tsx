@@ -72,7 +72,8 @@ const Checkout = () => {
   const parcelApplies = orderType === "delivery" || (orderType === "dine_in" && needsParcel);
   const parcelAmount = parcelApplies ? calculateParcelCharges() : 0;
   const subtotalWithParcel = totalPrice + parcelAmount;
-  const discountAmount = appliedCoupon ? Math.round(subtotalWithParcel * appliedCoupon.discount / 100) : 0;
+  const couponEligible = orderType === "dine_in";
+  const discountAmount = (couponEligible && appliedCoupon) ? Math.round(subtotalWithParcel * appliedCoupon.discount / 100) : 0;
   const grandTotal = subtotalWithParcel - discountAmount;
 
   const handleApplyCoupon = () => {
@@ -320,7 +321,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
               </p>
             </button>
             <button
-              onClick={() => { setOrderType("delivery"); setNeedsParcel(false); }}
+              onClick={() => { setOrderType("delivery"); setNeedsParcel(false); setAppliedCoupon(null); setCouponCode(""); }}
               className={`p-6 rounded-xl border-2 transition-all ${
                 orderType === "delivery"
                   ? "border-primary bg-primary/5"
@@ -407,42 +408,44 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
             </div>
           </div>
 
-          {/* Coupon Section */}
-          <div className="border-t border-border mt-3 pt-3">
-            {appliedCoupon ? (
-              <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-                <div className="flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-green-600" />
-                  <span className="text-sm font-medium text-green-600">{appliedCoupon.code} applied</span>
+          {/* Coupon Section - Dine In only */}
+          {orderType === "dine_in" && (
+            <div className="border-t border-border mt-3 pt-3">
+              {appliedCoupon ? (
+                <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-green-600">{appliedCoupon.code} applied</span>
+                  </div>
+                  <button onClick={handleRemoveCoupon} className="text-muted-foreground hover:text-foreground">
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-                <button onClick={handleRemoveCoupon} className="text-muted-foreground hover:text-foreground">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Enter coupon code"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    className="text-sm"
-                    maxLength={20}
-                  />
-                  <Button type="button" variant="outline" size="sm" onClick={handleApplyCoupon} className="shrink-0">
-                    Apply
-                  </Button>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter coupon code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      className="text-sm"
+                      maxLength={20}
+                    />
+                    <Button type="button" variant="outline" size="sm" onClick={handleApplyCoupon} className="shrink-0">
+                      Apply
+                    </Button>
+                  </div>
+                  <div className="space-y-1">
+                    {COUPONS.map((c) => (
+                      <p key={c.code} className="text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">{c.code}</span> — {c.label}
+                      </p>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  {COUPONS.map((c) => (
-                    <p key={c.code} className="text-xs text-muted-foreground">
-                      <span className="font-medium text-foreground">{c.code}</span> — {c.label}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Parcel info for delivery */}
