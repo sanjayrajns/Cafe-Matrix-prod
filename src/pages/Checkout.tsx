@@ -44,7 +44,9 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const [orderType, setOrderType] = useState<OrderType>("delivery");
+  const MIN_DELIVERY_ORDER = 250;
+  const canDeliver = totalPrice >= MIN_DELIVERY_ORDER;
+  const [orderType, setOrderType] = useState<OrderType>(canDeliver ? "delivery" : "dine_in");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [needsParcel, setNeedsParcel] = useState(false);
@@ -321,11 +323,13 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
               </p>
             </button>
             <button
-              onClick={() => { setOrderType("delivery"); setNeedsParcel(false); setAppliedCoupon(null); setCouponCode(""); }}
-              className={`p-6 rounded-xl border-2 transition-all ${
-                orderType === "delivery"
-                  ? "border-primary bg-primary/5"
-                  : "border-border bg-card hover:border-muted-foreground"
+              onClick={() => { if (canDeliver) { setOrderType("delivery"); setNeedsParcel(false); setAppliedCoupon(null); setCouponCode(""); } }}
+              className={`p-6 rounded-xl border-2 transition-all relative ${
+                !canDeliver
+                  ? "border-border bg-muted/50 cursor-not-allowed opacity-60"
+                  : orderType === "delivery"
+                    ? "border-primary bg-primary/5"
+                    : "border-border bg-card hover:border-muted-foreground"
               }`}
             >
               <Truck
@@ -338,6 +342,11 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
               }`}>
                 Delivery
               </p>
+              {!canDeliver && (
+                <p className="text-[10px] text-destructive mt-1">
+                  Min order ₹{MIN_DELIVERY_ORDER} required
+                </p>
+              )}
             </button>
           </div>
         </div>
