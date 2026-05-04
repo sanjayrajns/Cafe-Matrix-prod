@@ -20,11 +20,78 @@ import { supabase } from "@/integrations/supabase/client";
 
 type OrderType = "delivery" | "dine_in";
 
-// Configure your WhatsApp number here (include country code without + sign)
-const WHATSAPP_NUMBER = "918431356962";
-
 // Formspree endpoint
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mgolwldp";
+
+// Evolution API Configuration
+const EVOLUTION_API_URL = "https://evolution-api-46xy.onrender.com";
+const EVOLUTION_API_KEY = "supersecretkey";
+const EVOLUTION_INSTANCE = "pizza-shop";
+
+// Format phone number to international format without + sign
+const formatPhone = (phone: string): string => {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length > 10) return digits;
+  return `91${digits}`;
+};
+
+// Build a premium, detailed order confirmation message
+const buildOrderMessage = (order: {
+  customer_name: string;
+  order_type: string;
+  table_number: number | null;
+  address: string | null;
+  total: number;
+  special_instructions: string | null;
+  order_items: Array<{ item_name: string; quantity: number; price: number }>;
+}): string => {
+  const isDelivery = order.order_type === "delivery";
+  const itemLines = order.order_items
+    .map((item) => `  • ${item.quantity}× ${item.item_name}  —  ₹${item.price * item.quantity}`)
+    .join("\n");
+
+  const orderTypeLine = isDelivery
+    ? `🚚 *Delivery*\n📍 ${order.address}`
+    : `🍽️ *Dine-In*  |  Table No: ${order.table_number}`;
+
+  const specialNote = order.special_instructions
+    ? `\n\n📝 *Special Instructions:*\n_${order.special_instructions}_`
+    : "";
+
+  const timestamp = new Date().toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
+  return `╔══════════════════════════╗
+✅ *ORDER CONFIRMED!*
+╚══════════════════════════╝
+
+Hello *${order.customer_name}* 👋,
+
+Thank you for ordering from *Cafe Matrix*! 🎉 Your order has been received and is being prepared.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛒 *ORDER DETAILS*
+
+${orderTypeLine}
+
+*Items Ordered:*
+${itemLines}
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+💰 *Total Payable: ₹${order.total}*
+━━━━━━━━━━━━━━━━━━━━━━━━${specialNote}
+
+
+⏱️ *Placed at:* ${timestamp}
+
+_For any assistance, please contact us directly._
+
+🍕 *Cafe Matrix* — Taste the Difference!`;
+};
 
 // Per-item parcel charges by category
 const PARCEL_RATES: Record<string, number> = {
@@ -104,44 +171,63 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const generateWhatsAppMessage = () => {
-    const itemsList = items
-      .map((item) => `${item.quantity}x ${item.name} - ₹${item.price * item.quantity}`)
-      .join("\n");
+  // Send automated WhatsApp confirmation directly via Evolution API
+  const sendWhatsAppConfirmation = async (order: { id: string; phone: string; customer_name: string; order_type: string; table_number: number | null; address: string | null; total: number; special_instructions: string | null }) => {
+    const orderItems = items.map((item) => ({
+      item_name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+    }));
 
-    const parcelInfo = parcelApplies ? `\n*Parcel Charges:* ₹${parcelAmount}` : "";
-    const discountInfo = appliedCoupon ? `\n*Discount (${appliedCoupon.code} - ${appliedCoupon.discount}%):* -₹${discountAmount}` : "";
+    const message = buildOrderMessage({
+      customer_name: order.customer_name,
+      order_type: order.order_type,
+      table_number: order.table_number,
+      address: order.address,
+      total: order.total,
+      special_instructions: order.special_instructions,
+      order_items: orderItems,
+    });
 
-    const orderDetails = `
-🍕 *NEW ORDER*
-━━━━━━━━━━━━━━━
+    const url = `${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE}`;
+    const formattedPhone = formatPhone(order.phone);
+    const MAX_ATTEMPTS = 5;
 
-*Order Type:* ${orderType === "delivery" ? "🚚 Delivery" : "🍽️ Dine-In"}${orderType === "dine_in" && needsParcel ? " (Parcel)" : ""}
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      console.log(`Attempt ${attempt}/${MAX_ATTEMPTS} — Sending message to ${formattedPhone}`);
+      
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: EVOLUTION_API_KEY,
+          },
+          body: JSON.stringify({
+            number: formattedPhone,
+            text: message,
+          }),
+        });
 
-*Customer Details:*
-• Name: ${formData.name}
-• Phone: ${formData.phone}
-${formData.email ? `• Email: ${formData.email}` : ""}
-${orderType === "delivery" ? `• Address: ${formData.address}` : `• Table No: ${formData.tableNumber}`}
+        if (response.ok) {
+          console.log(`✅ WhatsApp confirmation sent successfully on attempt ${attempt}`);
+          return; // Success — stop retrying
+        }
+        
+        console.error(`❌ Attempt ${attempt} failed — Status: ${response.status}`);
+      } catch (err) {
+        console.error(`❌ Attempt ${attempt} threw an error:`, err);
+      }
 
-*Order Items:*
-${itemsList}
+      // Wait 2–5 seconds before next retry (skip wait on last attempt)
+      if (attempt < MAX_ATTEMPTS) {
+        const delay = Math.floor(Math.random() * (5000 - 2000 + 1) + 2000);
+        console.log(`⏳ Waiting ${delay}ms before next attempt...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
 
-━━━━━━━━━━━━━━━
-*Subtotal: ₹${totalPrice}*${parcelInfo}${discountInfo}
-*Total: ₹${grandTotal}*
-━━━━━━━━━━━━━━━
-
-${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInstructions}` : ""}
-    `.trim();
-
-    return orderDetails;
-  };
-
-  const openWhatsApp = () => {
-    const message = encodeURIComponent(generateWhatsAppMessage());
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
-    window.open(whatsappUrl, "_blank");
+    console.error(`🚨 WhatsApp notification failed after ${MAX_ATTEMPTS} attempts. Giving up.`);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -225,8 +311,8 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
         }),
       });
 
-      // Open WhatsApp with order details
-      openWhatsApp();
+      // Send automated WhatsApp confirmation (non-blocking, runs in background)
+      sendWhatsAppConfirmation(order);
 
       setOrderSuccess(true);
       clearCart();
@@ -260,7 +346,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
               : `Your order is being prepared and will be served at Table ${formData.tableNumber}.`}
           </p>
           <p className="text-sm text-muted-foreground mb-6">
-            A WhatsApp message has been opened with your order details. Please send it to confirm your order with the restaurant.
+            A WhatsApp confirmation has been sent to <span className="font-medium text-foreground">{formData.phone}</span>. You will receive it shortly! 🎉
           </p>
           <div className="space-y-3">
             <Button variant="hero" className="w-full" onClick={() => navigate("/")}>
@@ -471,7 +557,7 @@ ${formData.specialInstructions ? `*Special Instructions:* ${formData.specialInst
         <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6 flex items-center gap-3">
           <MessageCircle className="w-6 h-6 text-primary flex-shrink-0" />
           <p className="text-sm text-foreground">
-            Your order will be sent for quick confirmation.
+            📲 A WhatsApp confirmation will be sent to your number automatically after ordering.
           </p>
         </div>
 
