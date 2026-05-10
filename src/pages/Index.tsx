@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
+import SummerSpecialSection from "@/components/SummerSpecialSection";
 import About from "@/components/About";
 import Menu from "@/components/Menu";
 import Gallery from "@/components/Gallery";
@@ -13,6 +14,7 @@ const Index = () => {
     <main className="overflow-x-hidden">
       <Header />
       <Hero />
+      <SummerSpecialSection />
       <About />
       <Menu />
       <Gallery />

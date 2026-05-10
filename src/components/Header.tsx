@@ -1,19 +1,22 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, CalendarDays, ShoppingBag, Shield } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import SummerSpecialBanner from "@/components/SummerSpecialBanner";
 
 const navLinks = [
-  { label: "Menu", href: "#menu" },
-  { label: "About", href: "#about" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Visit", href: "#visit" },
+  { label: "Menu", href: "/#menu" },
+  { label: "About", href: "/#about" },
+  { label: "Gallery", href: "/#gallery" },
+  { label: "Visit", href: "/#visit" },
 ];
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,11 +34,12 @@ const Header = () => {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isScrolled
-            ? "bg-background/90 backdrop-blur-md shadow-soft py-4"
-            : "bg-transparent py-6"
+            ? "bg-background/90 backdrop-blur-md shadow-soft"
+            : "bg-transparent"
         }`}
       >
-        <div className="container mx-auto px-6 flex items-center justify-between">
+        {isHomePage && <SummerSpecialBanner />}
+        <div className={`container mx-auto px-6 flex items-center justify-between transition-all duration-500 ${isScrolled ? 'py-4' : 'py-6'}`}>
           {/* Logo */}
           <a href="#" className="relative z-10 flex items-center gap-2">
             <img src="/logo.png" alt="Matrix Cafe" className="w-8 h-8 md:w-10 md:h-10 object-cover rounded-full" />

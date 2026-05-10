@@ -17,6 +17,7 @@ import {
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import CheckoutOffersCard from "@/components/CheckoutOffersCard";
 
 type OrderType = "delivery" | "dine_in";
 
@@ -46,9 +47,18 @@ const buildOrderMessage = (order: {
   order_items: Array<{ item_name: string; quantity: number; price: number }>;
 }): string => {
   const isDelivery = order.order_type === "delivery";
-  const itemLines = order.order_items
+  
+  // Separate regular items from free offer items
+  const regularItems = order.order_items.filter(item => item.price > 0 || !item.item_name.includes("FREE"));
+  const freeItems = order.order_items.filter(item => item.price === 0 && item.item_name.includes("FREE"));
+
+  const itemLines = regularItems
     .map((item) => `  • ${item.quantity}× ${item.item_name}  —  ₹${item.price * item.quantity}`)
     .join("\n");
+
+  const freeItemLines = freeItems.length > 0
+    ? `\n🎉 *OFFERS APPLIED!*\n${freeItems.map(item => `  🎁 ${item.quantity}× ${item.item_name}`).join("\n")}\n`
+    : "";
 
   const orderTypeLine = isDelivery
     ? `🚚 *Delivery*\n📍 ${order.address}`
@@ -80,11 +90,17 @@ ${orderTypeLine}
 
 *Items Ordered:*
 ${itemLines}
-
+${freeItemLines}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 💰 *Total Payable: ₹${order.total}*
 ━━━━━━━━━━━━━━━━━━━━━━━━${specialNote}
 
+🎁 *SUMMER SPECIALS ONGOING!*
+_Valid until 21st May 2026_
+🍕 Buy 1 Medium/Large Pizza ➔ Get Mini/Regular FREE
+🥤 Buy 2 Milkshakes/Mojitos/Pastries ➔ Get 1 FREE
+Enjoy your free rewards on qualifying items!
+━━━━━━━━━━━━━━━━━━━━━━━━
 
 ⏱️ *Placed at:* ${timestamp}
 
@@ -105,6 +121,7 @@ const COUPONS = [
   { code: "SAVE10", minOrder: 200, discount: 10, label: "10% off on orders above ₹200" },
   { code: "SAVE20", minOrder: 500, discount: 20, label: "20% off on orders above ₹500" },
 ];
+
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
@@ -383,6 +400,8 @@ const Checkout = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-2xl">
+        <CheckoutOffersCard />
+
         {/* Order Type Selection */}
         <div className="mb-8 bg-card rounded-xl p-6 shadow-soft border border-border">
           <h2 className="font-display text-lg text-foreground mb-4">
