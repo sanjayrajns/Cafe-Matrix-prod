@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { playToastSound } from "@/hooks/useToastSound";
+import { supabase } from "@/integrations/supabase/client";
 import {
   orderMenuItems,
   orderCategories,
@@ -56,6 +57,7 @@ const AdminBilling = () => {
 
   // Validation
   const [phoneError, setPhoneError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   // Filter menu items based on search + category
   const filteredMenuItems = useMemo(() => {
@@ -194,8 +196,8 @@ const AdminBilling = () => {
     return msg;
   };
 
-  // Send WhatsApp
-  const handleSendWhatsApp = () => {
+  // Send WhatsApp and Save Order to Database
+  const handleSendWhatsApp = async () => {
     if (billingItems.length === 0) {
       toast({
         title: "No items added",
@@ -211,18 +213,70 @@ const AdminBilling = () => {
       return;
     }
 
-    const cleaned = phoneNumber.replace(/\D/g, "");
-    const fullNumber = `91${cleaned}`;
-    const message = encodeURIComponent(buildWhatsAppMessage());
-    const url = `https://wa.me/${fullNumber}?text=${message}`;
+    setIsSaving(true);
 
-    window.open(url, "_blank");
+    try {
+      // 1. Create order in database
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          order_type: deliveryAmount > 0 ? "delivery" : "dine_in",
+          customer_name: customerName.trim() || "Walk-in Customer",
+          phone: phoneNumber.trim(),
+          email: null,
+          address: null,
+          table_number: null,
+          special_instructions: null,
+          total: grandTotal,
+          status: "completed",
+        })
+        .select()
+        .single();
 
-    toast({
-      title: "WhatsApp opened!",
-      description: "Bill sent to customer's WhatsApp.",
-    });
-    playToastSound();
+      if (orderError) throw orderError;
+
+      // 2. Create order items in database
+      const orderItems = billingItems.map((item) => ({
+        order_id: order.id,
+        item_name: item.name,
+        category: item.category,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("order_items")
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      // 3. Open WhatsApp
+      const cleaned = phoneNumber.replace(/\D/g, "");
+      const fullNumber = `91${cleaned}`;
+      const message = encodeURIComponent(buildWhatsAppMessage());
+      const url = `https://wa.me/${fullNumber}?text=${message}`;
+
+      window.open(url, "_blank");
+
+      toast({
+        title: "Order saved & WhatsApp opened!",
+        description: "The order is saved in the dashboard and WhatsApp is opened.",
+      });
+      playToastSound();
+
+      // Clear the bill
+      handleClearBill();
+    } catch (error) {
+      console.error("Error saving order:", error);
+      toast({
+        title: "Failed to save order",
+        description: "There was an error saving the order to the database.",
+        variant: "destructive",
+      });
+      playToastSound();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Clear all
@@ -769,10 +823,17 @@ const AdminBilling = () => {
             <Button
               id="billing-send-whatsapp"
               onClick={handleSendWhatsApp}
-              className="w-full h-12 text-base font-semibold rounded-xl bg-[#25D366] hover:bg-[#1ebe5a] text-white shadow-lg hover:shadow-xl transition-all duration-200"
+              disabled={isSaving}
+              className="w-full h-12 text-base font-semibold rounded-xl bg-[#25D366] hover:bg-[#1ebe5a] text-white shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50"
             >
-              <MessageCircle className="w-5 h-5 mr-2" />
-              Send WhatsApp Message
+              {isSaving ? (
+                <span>Saving Order...</span>
+              ) : (
+                <>
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Send WhatsApp Message
+                </>
+              )}
             </Button>
           </motion.div>
         </div>
