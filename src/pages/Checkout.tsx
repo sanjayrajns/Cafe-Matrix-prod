@@ -17,7 +17,6 @@ import {
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import CheckoutOffersCard from "@/components/CheckoutOffersCard";
 
 type OrderType = "delivery" | "dine_in";
 
@@ -94,13 +93,6 @@ ${freeItemLines}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 💰 *Total Payable: ₹${order.total}*
 ━━━━━━━━━━━━━━━━━━━━━━━━${specialNote}
-
-🎁 *SUMMER SPECIALS ONGOING!*
-_Valid until 21st May 2026_
-🍕 Buy 1 Medium/Large Pizza ➔ Get Mini/Regular FREE
-🥤 Buy 2 Milkshakes/Mojitos/Pastries ➔ Get 1 FREE
-Enjoy your free rewards on qualifying items!
-━━━━━━━━━━━━━━━━━━━━━━━━
 
 ⏱️ *Placed at:* ${timestamp}
 
@@ -400,8 +392,6 @@ const Checkout = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-2xl">
-        <CheckoutOffersCard />
-
         {/* Order Type Selection */}
         <div className="mb-8 bg-card rounded-xl p-6 shadow-soft border border-border">
           <h2 className="font-display text-lg text-foreground mb-4">
