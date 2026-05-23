@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Lock, LogOut, CalendarDays, ShoppingBag, UtensilsCrossed, Settings, BarChart3 } from "lucide-react";
+import { Lock, LogOut, CalendarDays, ShoppingBag, UtensilsCrossed, Settings, BarChart3, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import AdminReservations from "@/components/admin/AdminReservations";
 import AdminOrders from "@/components/admin/AdminOrders";
 import AdminMenuItems from "@/components/admin/AdminMenuItems";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
+import AdminBilling from "@/components/admin/AdminBilling";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -149,10 +150,14 @@ const Admin = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl grid-cols-5">
+          <TabsList className="grid w-full max-w-3xl grid-cols-6">
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ShoppingBag className="w-4 h-4" />
               <span className="hidden sm:inline">Orders</span>
+            </TabsTrigger>
+            <TabsTrigger value="billing" className="flex items-center gap-2">
+              <Receipt className="w-4 h-4" />
+              <span className="hidden sm:inline">Billing</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
@@ -175,6 +180,11 @@ const Admin = () => {
           {/* Orders Tab */}
           <TabsContent value="orders">
             <AdminOrders />
+          </TabsContent>
+
+          {/* Billing Tab */}
+          <TabsContent value="billing">
+            <AdminBilling />
           </TabsContent>
 
           {/* Analytics Tab */}
