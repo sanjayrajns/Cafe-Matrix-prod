@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Truck, UtensilsCrossed, Check, X, Clock, Trash2, MapPin, ChefHat, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { format, isToday, isYesterday } from "date-fns";
 import { useOrderNotification } from "@/hooks/useOrderNotification";
 import { playToastSound } from "@/hooks/useToastSound";
 
@@ -43,6 +43,61 @@ interface Order {
   created_at: string;
   order_items?: OrderItem[];
 }
+
+// Get initials from customer name for avatar
+const getInitials = (name: string): string => {
+  return name
+    .split(" ")
+    .map((part) => part.charAt(0))
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+// Generate a consistent color from a name string
+const getAvatarColor = (name: string): string => {
+  const colors = [
+    "from-violet-500 to-purple-600",
+    "from-blue-500 to-cyan-600",
+    "from-emerald-500 to-teal-600",
+    "from-orange-500 to-amber-600",
+    "from-pink-500 to-rose-600",
+    "from-indigo-500 to-blue-600",
+    "from-teal-500 to-green-600",
+    "from-red-500 to-orange-600",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
+
+// Get the date label for an order
+const getDateLabel = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  if (isToday(date)) return "Today";
+  if (isYesterday(date)) return "Yesterday";
+  return format(date, "EEEE, MMM d");
+};
+
+// Group orders by date label
+const groupOrdersByDate = (orders: Order[]): { label: string; orders: Order[] }[] => {
+  const groups: Map<string, Order[]> = new Map();
+
+  for (const order of orders) {
+    const label = getDateLabel(order.created_at);
+    if (!groups.has(label)) {
+      groups.set(label, []);
+    }
+    groups.get(label)!.push(order);
+  }
+
+  return Array.from(groups.entries()).map(([label, orders]) => ({
+    label,
+    orders,
+  }));
+};
 
 const AdminOrders = () => {
   const { toast } = useToast();
@@ -131,12 +186,18 @@ const AdminOrders = () => {
     }
   };
 
-  const deliveryOrders = orders.filter((o) => o.order_type === "delivery");
-  const dineInOrders = orders.filter((o) => o.order_type === "dine_in");
+  const deliveryOrders = useMemo(() => orders.filter((o) => o.order_type === "delivery"), [orders]);
+  const dineInOrders = useMemo(() => orders.filter((o) => o.order_type === "dine_in"), [orders]);
+
+  const groupedDeliveryOrders = useMemo(() => groupOrdersByDate(deliveryOrders), [deliveryOrders]);
+  const groupedDineInOrders = useMemo(() => groupOrdersByDate(dineInOrders), [dineInOrders]);
 
   const renderOrderCard = (order: Order) => {
     const isPending = order.status === "pending";
     const isComplete = order.status === "complete";
+    const initials = getInitials(order.customer_name);
+    const avatarColor = getAvatarColor(order.customer_name);
+
     return (
       <motion.div
         key={order.id}
@@ -152,32 +213,45 @@ const AdminOrders = () => {
       >
         <div className="p-4">
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="space-y-2 flex-1">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h3 className="font-medium text-foreground text-lg">
-                  {order.customer_name}
-                </h3>
-                {getStatusBadge(order.status)}
-                {order.order_type === "dine_in" && order.table_number && (
-                  <Badge variant="outline">Table {order.table_number}</Badge>
+            {/* Customer avatar + info */}
+            <div className="flex items-start gap-3 flex-1">
+              {/* Avatar */}
+              <div
+                className={`w-11 h-11 rounded-full bg-gradient-to-br ${avatarColor} flex items-center justify-center flex-shrink-0 shadow-md`}
+              >
+                <span className="text-white font-bold text-sm leading-none">
+                  {initials}
+                </span>
+              </div>
+
+              {/* Order details */}
+              <div className="space-y-2 flex-1 min-w-0">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h3 className="font-medium text-foreground text-lg">
+                    {order.customer_name}
+                  </h3>
+                  {getStatusBadge(order.status)}
+                  {order.order_type === "dine_in" && order.table_number && (
+                    <Badge variant="outline">Table {order.table_number}</Badge>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    {format(new Date(order.created_at), "MMM d, h:mm a")}
+                  </span>
+                  <span className="font-semibold text-primary">₹{order.total}</span>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {order.phone}
+                  {order.email && ` • ${order.email}`}
+                </div>
+                {order.order_type === "delivery" && order.address && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    <MapPin className="w-3 h-3" /> {order.address}
+                  </p>
                 )}
               </div>
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  {format(new Date(order.created_at), "MMM d, h:mm a")}
-                </span>
-                <span className="font-semibold text-primary">₹{order.total}</span>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {order.phone}
-                {order.email && ` • ${order.email}`}
-              </div>
-              {order.order_type === "delivery" && order.address && (
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <MapPin className="w-3 h-3" /> {order.address}
-                </p>
-              )}
             </div>
 
             <div className="flex gap-2">
@@ -284,6 +358,31 @@ const AdminOrders = () => {
     );
   };
 
+  const renderDateGroup = (group: { label: string; orders: Order[] }) => (
+    <div key={group.label} className="space-y-3">
+      {/* Date label header */}
+      <div className="flex items-center gap-3">
+        <div className={`px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide uppercase ${
+          group.label === "Today"
+            ? "bg-primary/15 text-primary border border-primary/20"
+            : group.label === "Yesterday"
+            ? "bg-accent/15 text-accent border border-accent/20"
+            : "bg-muted text-muted-foreground border border-border"
+        }`}>
+          {group.label}
+        </div>
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-xs text-muted-foreground">
+          {group.orders.length} order{group.orders.length !== 1 ? "s" : ""}
+        </span>
+      </div>
+      {/* Orders under this date */}
+      <div className="space-y-4">
+        {group.orders.map(renderOrderCard)}
+      </div>
+    </div>
+  );
+
   const renderEmptyState = (type: string) => (
     <div className="bg-card rounded-xl p-8 text-center">
       {type === "delivery" ? (
@@ -316,17 +415,9 @@ const AdminOrders = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="delivery" className="space-y-4">
+      <Tabs defaultValue="dine_in" className="space-y-4">
         <TabsList className="grid w-full max-w-xs grid-cols-2">
-          <TabsTrigger value="delivery" className="flex items-center gap-2">
-            <Truck className="w-4 h-4" />
-            Delivery
-            {deliveryOrders.length > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5">
-                {deliveryOrders.length}
-              </Badge>
-            )}
-          </TabsTrigger>
+          {/* Dine-In tab FIRST (left side) */}
           <TabsTrigger value="dine_in" className="flex items-center gap-2">
             <UtensilsCrossed className="w-4 h-4" />
             Dine-In
@@ -336,18 +427,30 @@ const AdminOrders = () => {
               </Badge>
             )}
           </TabsTrigger>
+          {/* Delivery tab SECOND (right side) */}
+          <TabsTrigger value="delivery" className="flex items-center gap-2">
+            <Truck className="w-4 h-4" />
+            Delivery
+            {deliveryOrders.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                {deliveryOrders.length}
+              </Badge>
+            )}
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="delivery" className="space-y-4">
-          {deliveryOrders.length === 0
-            ? renderEmptyState("delivery")
-            : deliveryOrders.map(renderOrderCard)}
-        </TabsContent>
-
-        <TabsContent value="dine_in" className="space-y-4">
+        {/* Dine-In content FIRST */}
+        <TabsContent value="dine_in" className="space-y-6">
           {dineInOrders.length === 0
             ? renderEmptyState("dine_in")
-            : dineInOrders.map(renderOrderCard)}
+            : groupedDineInOrders.map(renderDateGroup)}
+        </TabsContent>
+
+        {/* Delivery content SECOND */}
+        <TabsContent value="delivery" className="space-y-6">
+          {deliveryOrders.length === 0
+            ? renderEmptyState("delivery")
+            : groupedDeliveryOrders.map(renderDateGroup)}
         </TabsContent>
       </Tabs>
     </div>
