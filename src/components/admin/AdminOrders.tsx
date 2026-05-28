@@ -366,7 +366,7 @@ const AdminOrders = () => {
           group.label === "Today"
             ? "bg-primary/15 text-primary border border-primary/20"
             : group.label === "Yesterday"
-            ? "bg-accent/15 text-accent border border-accent/20"
+            ? "bg-black text-white border border-black dark:bg-white dark:text-black"
             : "bg-muted text-muted-foreground border border-border"
         }`}>
           {group.label}
